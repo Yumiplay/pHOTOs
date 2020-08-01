@@ -21,4 +21,9 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
-          default: tr
+          default: true
+      - name: Build wheels - universal2
+        run: |
+          export MACOSX_DEPLOYMENT_TARGET=10.14
+          rustup target add aarch64-apple-darwin
+    
