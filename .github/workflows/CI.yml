@@ -30,4 +30,8 @@ jobs:
           maturin build --release --universal2 --out dist
       - name: Install built wheel - universal2
         run: |
-          pip instal
+          pip install rocksdict --no-index --find-links dist --force-reinstall
+      - name: Python UnitTest
+        run: |
+          python -m unittest discover -v test
+      
