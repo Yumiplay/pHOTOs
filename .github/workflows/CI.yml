@@ -34,4 +34,13 @@ jobs:
       - name: Python UnitTest
         run: |
           python -m unittest discover -v test
-      
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      fail-f
