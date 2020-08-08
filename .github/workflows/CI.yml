@@ -49,4 +49,9 @@ jobs:
         py_version: [ 3.7, 3.8, 3.9, "3.10", "3.11" ]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py_version }}
+          architecture: ${{ matrix.target }}
+      - name: Install LLVM and Clang
+        uses:
