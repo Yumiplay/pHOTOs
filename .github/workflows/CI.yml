@@ -54,4 +54,8 @@ jobs:
           python-version: ${{ matrix.py_version }}
           architecture: ${{ matrix.target }}
       - name: Install LLVM and Clang
-        uses:
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 11.0
+          directory: ${{ runner.temp }}/llvm-11.0
+      - name: Install Rust toolcha
