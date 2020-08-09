@@ -64,4 +64,10 @@ jobs:
           toolchain: nightly
           default: true
       - name: Build wheels
-        uses: messense/maturin
+        uses: messense/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+        env:
+          LIBCLANG_PATH: ${{ runner.temp }}/llvm-11.0/lib
+      - na
