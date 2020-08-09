@@ -58,4 +58,10 @@ jobs:
         with:
           version: 11.0
           directory: ${{ runner.temp }}/llvm-11.0
-      - name: Install Rust toolcha
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+      - name: Build wheels
+        uses: messense/maturin
