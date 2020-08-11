@@ -74,4 +74,11 @@ jobs:
         run: |
           pip install rocksdict --no-index --find-links dist --force-reinstall
           python -m unittest discover -v test
-      -
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+
+  manylinux_2_28:
+    runs-on: ubuntu-latest
