@@ -95,4 +95,8 @@ jobs:
       - name: Build Wheels
         uses: messense/maturin-action@v1
         with:
-   
+          rust-toolchain: nightly
+          rustup-components: rustfmt
+          target: ${{ matrix.target }}
+          manylinux: 2_28
+          args: --relea
