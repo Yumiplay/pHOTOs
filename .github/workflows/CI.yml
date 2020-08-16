@@ -105,4 +105,13 @@ jobs:
         if: matrix.target == 'x86_64'
         run: |
           pip install rocksdict --no-index --find-links dist --force-reinstall
-          python -m unittest discover 
+          python -m unittest discover -v test
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
+
+  manylinux2014:
+    runs-on: ubuntu-latest
+    st
