@@ -128,4 +128,8 @@ jobs:
         uses: messense/maturin-action@v1
         with:
           rust-toolchain: nightly
-    
+          rustup-components: rustfmt
+          target: ${{ matrix.target }}
+          manylinux: 2014
+          args: --release --out dist --interpreter '3.7 3.8 3.9 3.10 3.11'
+  
