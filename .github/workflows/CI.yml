@@ -114,4 +114,12 @@ jobs:
 
   manylinux2014:
     runs-on: ubuntu-latest
-    st
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          
