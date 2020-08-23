@@ -140,4 +140,13 @@ jobs:
           python -m unittest discover -v test
       - name: Upload wheels
         uses: actions/upload-artifact@v2
-      
+        with:
+          name: wheels
+          path: dist
+
+  linux-cross:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [a
