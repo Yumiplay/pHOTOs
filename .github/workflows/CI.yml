@@ -168,4 +168,9 @@ jobs:
         if: matrix.target != 'ppc64'
         name: Install built wheel and test
         with:
-          arch: ${{ matrix.target
+          arch: ${{ matrix.target }}
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update
+            apt-get install -y --no-install-re
