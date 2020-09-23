@@ -10,4 +10,10 @@ This package is ported using pyO3 from rust library `bitcoin-explorer`
 
 ### Installation
 
-MacOS, Windows, and Linux
+MacOS, Windows, and Linux wheels are provided.
+
+Use `pip install bitcoin-explorer` to install.
+
+## Documentation
+
+This library has a Rust version, go to [Rust Documentation](https://docs.rs/bitcoin-exp
