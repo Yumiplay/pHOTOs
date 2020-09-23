@@ -16,4 +16,10 @@ Use `pip install bitcoin-explorer` to install.
 
 ## Documentation
 
-This library has a Rust version, go to [Rust Documentation](https://docs.rs/bitcoin-exp
+This library has a Rust version, go to [Rust Documentation](https://docs.rs/bitcoin-explorer/)
+
+For python documentation, go to [Documentation](https://congyuwang.github.io/Py-Bitcoin-Explorer/bitcoin_explorer.html).
+
+## Compatibility Note
+
+This package deals
