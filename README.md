@@ -22,4 +22,7 @@ For python documentation, go to [Documentation](https://congyuwang.github.io/Py-
 
 ## Compatibility Note
 
-This package deals
+This package deals with the binary file of another software `Bitcoin Core`.
+It might not be compatible with older Bitcoin Core versions.
+
+Currently, it is compatible with Bitcoin Core 
