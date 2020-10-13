@@ -45,4 +45,9 @@ db.get_block_count()
 # get block of a certain height
 db.get_block(1000)
 
-# to retrieve the connected outputs of eac
+# to retrieve the connected outputs of each inputs as well.
+# note that this is inefficient.
+# Use `get_block_iter_range(end, connected=True)` for better performance.
+db.get_block(1000, connected=True)
+
+# get block hash of a certai
