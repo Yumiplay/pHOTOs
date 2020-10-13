@@ -37,4 +37,12 @@ It contains one class `BitcoinDB`.
 import bitcoin_explorer as bex
 
 # parse the same path as `--datadir` argument for `bitcoind`.
-db = bex.BitcoinDB("~/Bitcoin
+db = bex.BitcoinDB("~/Bitcoin")
+
+# get the length of the longest chain currently on disk.
+db.get_block_count()
+
+# get block of a certain height
+db.get_block(1000)
+
+# to retrieve the connected outputs of eac
