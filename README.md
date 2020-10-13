@@ -31,4 +31,10 @@ Copyright (C) 2009-2020 The Bitcoin Core developers`.
 
 ## Examples
 
-It cont
+It contains one class `BitcoinDB`.
+
+```python
+import bitcoin_explorer as bex
+
+# parse the same path as `--datadir` argument for `bitcoind`.
+db = bex.BitcoinDB("~/Bitcoin
