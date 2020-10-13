@@ -25,4 +25,10 @@ For python documentation, go to [Documentation](https://congyuwang.github.io/Py-
 This package deals with the binary file of another software `Bitcoin Core`.
 It might not be compatible with older Bitcoin Core versions.
 
-Currently, it is compatible with Bitcoin Core 
+Currently, it is compatible with Bitcoin Core version
+`Bitcoin Core version v0.21.1.0-g194b9b8792d9b0798fdb570b79fa51f1d1f5ebaf
+Copyright (C) 2009-2020 The Bitcoin Core developers`.
+
+## Examples
+
+It cont
