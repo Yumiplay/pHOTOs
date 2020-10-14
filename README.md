@@ -50,4 +50,9 @@ db.get_block(1000)
 # Use `get_block_iter_range(end, connected=True)` for better performance.
 db.get_block(1000, connected=True)
 
-# get block hash of a certai
+# get block hash of a certain height.
+db.get_hash_from_height(1000)
+
+# a fast method for getting just the header.
+# in memory query, no disk access
+db.get_block_header(1
