@@ -55,4 +55,11 @@ db.get_hash_from_height(1000)
 
 # a fast method for getting just the header.
 # in memory query, no disk access
-db.get_block_header(1
+db.get_block_header(1000)
+
+# get block of height 1000.
+db.get_height_from_hash("some hash")
+
+# get transaction from txid.
+# This queries the `levelDB` each time, thus it is relatively slow.
+db.get
