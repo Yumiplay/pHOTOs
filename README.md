@@ -72,4 +72,10 @@ db.parse_script("some hex script pubic key")
 
 # use iterator
 for block in db.get_block_iter_range(start=1000, end=2000):
-    do_somet
+    do_something_with(block)
+
+# use iterator, iterate over heights
+for block in db.get_block_iter_array(heights=[1, 3, 5, 7, 9]):
+    do_something_with(block)
+    
+# use iterator, connect
