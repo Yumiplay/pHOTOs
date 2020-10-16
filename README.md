@@ -67,4 +67,9 @@ db.get_transaction("some txid")
 # get the height of the block which this transaction belongs.
 db.get_height_from_txid("some txid")
 
-# get the script type and addresses from a scri
+# get the script type and addresses from a script public key
+db.parse_script("some hex script pubic key")
+
+# use iterator
+for block in db.get_block_iter_range(start=1000, end=2000):
+    do_somet
