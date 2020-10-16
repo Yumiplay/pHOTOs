@@ -62,4 +62,9 @@ db.get_height_from_hash("some hash")
 
 # get transaction from txid.
 # This queries the `levelDB` each time, thus it is relatively slow.
-db.get
+db.get_transaction("some txid")
+
+# get the height of the block which this transaction belongs.
+db.get_height_from_txid("some txid")
+
+# get the script type and addresses from a scri
