@@ -198,3 +198,143 @@ class BitcoinDB:
     def get_transaction(self,
                         txid: str,
                         simplify: bool = True,
+                        connected: bool = False) -> dict:
+        """Get transaction data from transaction ID.
+
+        Notes:
+            Setting connected to `True` will retrieve the sender's
+            addresses. This operation queries the on-disk levelDB
+            to read transactions, and is not the most performant.
+
+        Args:
+            txid (str): transaction id (hex string).
+            simplify (bool): default True. Use simpler format.
+            connected (bool): whether to replace inputs by
+                related outputs according to input outpoints.
+
+        Returns: transaction data.
+
+        """
+        if not self.tx_index:
+            raise Exception("tx_index is set to False")
+        if not connected:
+            if simplify:
+                return self.db.get_transaction_simple(txid)
+            else:
+                return self.db.get_transaction_full(txid)
+        else:
+            if not self.tx_index:
+                raise Exception("tx_index is set to False")
+            if simplify:
+                return self.db.get_transaction_simple_connected(txid)
+            else:
+                return self.db.get_transaction_full_connected(txid)
+
+    def get_height_from_txid(self, txid: str) -> int:
+        """Get height of the block that includes a transaction.
+
+        Notes:
+            This operation queries the on-disk levelDB (txindex).
+            Thus is not the most performant operation.
+
+        Args:
+            txid(str): transaction id (hex string).
+
+        Returns: height (int).
+
+        """
+        if not self.tx_index:
+            raise Exception("tx_index is set to False")
+        return self.db.get_height_from_txid(txid)
+
+    def get_block_iter_range(self,
+                             stop,
+                             start: int = 0,
+                             simplify: bool = True,
+                             connected: bool = False) -> Iterator[dict]:
+        """Iterate through blocks in ascending order of heights.
+
+        This iterator fails fast. Any error interrupts it.
+
+        Notes:
+            This is best way to retrieve a large number of input
+            addresses (set connected to `True`).
+
+            It loops over blocks and transactions in sequential
+            order, and keeps track of unspent outputs, which enables
+            looking up outpoints in memory instead of using levelDB.
+
+            When `connected=True`, iterating through 0 to 700000 blocks
+            requires about 5 GB memory.
+
+        Examples:
+            ::
+
+                # get connected blocks use a `for in loop`
+                for block in db.get_block_iter_range(stop=700000, connected=True):
+                    do_some_computation_with_the_block(block)
+
+        Args:
+            stop: stop height (excluded).
+            start: starting height, which is ignored if `connected=True`
+                since connected iterator can only run from first block.
+            simplify: default True. Use simpler format.
+            connected: default False. Set to `True` to find out input
+                addresses.
+
+        Returns: python iterator of block.
+
+        """
+        if not connected:
+            if simplify:
+                return self.db.iter_block_simple_seq(start, stop)
+            else:
+                return self.db.iter_block_full_seq(start, stop)
+        else:
+            if simplify:
+                return self.db.iter_block_simple_connected(stop)
+            else:
+                return self.db.iter_block_full_connected(stop)
+
+    def get_block_iter_array(self,
+                             heights: List[int],
+                             simplify: bool = True) -> Iterator[dict]:
+        """Iterate through blocks of a given list of heights.
+
+        This iterator fails fast. Any error interrupts it.
+
+        Notes:
+            This iterator is also implemented to execute in parallel.
+            However, the throughput might be restricted by python.
+
+            This iterator does not support connecting outpoints.
+
+        Examples:
+            ::
+
+                # get connected blocks use a `for in loop`
+                for block in db.get_block_iter_array(list(range(2000, 3000))):
+                    do_some_computation_with_the_block(block)
+
+        Args:
+            heights: a list of heights.
+            simplify: default True. Use simpler format.
+
+        Returns: python iterator of block.
+
+        """
+        if simplify:
+            return self.db.iter_block_simple_arr(heights)
+        else:
+            return self.db.iter_block_full_arr(heights)
+
+    def parse_script(self, script_pub_key: str) -> dict:
+        """Decode the script type and addresses from script public key.
+
+        Args:
+            script_pub_key: script public key (hex encoded string).
+
+        Returns: script type and related addresses.
+
+        """
+        return self.db.parse_script(script_pub_key)
