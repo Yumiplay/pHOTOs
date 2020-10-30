@@ -100,3 +100,162 @@ bitcoin_explorer    </h1>
 <li><code>pip install bitcoin-explorer</code></li>
 </ul></li>
 <li><p>How to use?</p>
+
+<ul>
+<li>Download Bitcoin Core app from bitcoin official website.</li>
+<li>Sync full Bitcoin data.</li>
+<li>If you wish to query transaction with txid (i.e. transaction id),
+run Bitcoin Core or <code>bitcoind</code> with flag <code>--txindex=1</code>,
+or rerun Bitcoin Core with <code>--reindex --txindex=1</code>.</li>
+<li>After having the Bitcoin blockchain data, shutdown Bitcoin Core
+or <code>bitcoind</code>. This program cannot run concurrently with
+Bitcoin Core.</li>
+<li>Open <code>python</code>, import the package, and instantiate <code><a href="#BitcoinDB">BitcoinDB</a></code>.</li>
+</ul></li>
+</ol>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BitcoinQuery: Query Bitcoin Core Data Files As A Database.</span>
+
+<span class="sd">1. How to install?</span>
+<span class="sd">    - `pip install bitcoin-explorer`</span>
+
+<span class="sd">2. How to use?</span>
+<span class="sd">    - Download Bitcoin Core app from bitcoin official website.</span>
+<span class="sd">    - Sync full Bitcoin data.</span>
+<span class="sd">    - If you wish to query transaction with txid (i.e. transaction id),</span>
+<span class="sd">      run Bitcoin Core or `bitcoind` with flag `--txindex=1`,</span>
+<span class="sd">      or rerun Bitcoin Core with `--reindex --txindex=1`.</span>
+<span class="sd">    - After having the Bitcoin blockchain data, shutdown Bitcoin Core</span>
+<span class="sd">      or `bitcoind`. This program cannot run concurrently with</span>
+<span class="sd">      Bitcoin Core.</span>
+<span class="sd">    - Open `python`, import the package, and instantiate `BitcoinDB`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span> <span class="k">as</span> <span class="nn">_log</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">.bitcoin_explorer</span> <span class="kn">import</span> <span class="n">BitcoinDB</span> <span class="k">as</span> <span class="n">_BitcoinDB</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">_log</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">_log</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;[</span><span class="si">%(asctime)s</span><span class="s1">] </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%H:%M:%S&#39;</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BitcoinDB</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Query bitcoin core like a database.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tx_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate this class to query bitcoin core files.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Pass the bitcoin directory to the argument, wait for</span>
+<span class="sd">            the program to read the block index, and possibly transaction</span>
+<span class="sd">            index. This should take a few seconds.</span>
+
+<span class="sd">            Caveat: instantiating the class with tx_index=True</span>
+<span class="sd">            will hold the LOCK of txindex levelDB, thus preventing</span>
+<span class="sd">            another instance to use the transaction ID query related</span>
+<span class="sd">            APIs. Although the other APIs will work just fine.</span>
+<span class="sd">            Multiple instances of the class should work properly,</span>
+<span class="sd">            which can be used for parallel programming, and thus</span>
+<span class="sd">            increasing processing speed.</span>
+
+<span class="sd">            However, it is important to know that, **during the starting</span>
+<span class="sd">            period of BitcoinDB object, it locks the block index levelDB,</span>
+<span class="sd">            which would make another BitcoinDB object fail to instantiate</span>
+<span class="sd">            at the same time.** If multiple instances of BitcoinDB objects</span>
+<span class="sd">            are needed, they must wait for the other instance to finish</span>
+<span class="sd">            reading the levelDB.</span>
+
+
+<span class="sd">        Examples:</span>
+<span class="sd">            ::</span>
+
+<span class="sd">                # import package</span>
+<span class="sd">                import bitcoin_explorer as bq</span>
+
+<span class="sd">                # launch bitcoinDB</span>
+<span class="sd">                db = bq.BitcoinDB(&quot;/Users/me/Bitcoin&quot;, tx_index=True)</span>
+
+<span class="sd">                # query block information of height 10000</span>
+<span class="sd">                block = db.get_block(10000)</span>
+<span class="sd">                print(block[&quot;txdata&quot;])</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path: the same as bitcoin core `--datadir` as path argument.</span>
+<span class="sd">            tx_index (bool): if your `Bitcoin Core` is launched with</span>
+<span class="sd">                `--txindex=1`, you may set `tx_index=True` to query</span>
+<span class="sd">                transactions with `txid` (transaction id).</span>
+<span class="sd">                When this is set to `True`, BitcoinDB will attempt to</span>
+<span class="sd">                open the levelDB in `indexes/txindex` directory,</span>
+<span class="sd">                and will print a warning if it fails to open.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">_BitcoinDB</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">tx_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span> <span class="o">=</span> <span class="n">tx_index</span>
+
+    <span class="k">def</span> <span class="nf">get_max_height</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the maximum height found in block data directory.</span>
+
+<span class="sd">        Returns: max height in block index.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_max_height</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                  <span class="n">simplify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                  <span class="n">connected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the block of a specific height.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            To get addresses of inputs, set connected to `True`.</span>
+
+<span class="sd">            However, tracing block inputs in this manner requires</span>
+<span class="sd">            extensive query to txindex levelDB, and random reading</span>
+<span class="sd">            of disk, which is too slow. It takes several seconds</span>
+<span class="sd">            to get just one big block (i.e., blocks with 1 thousand</span>
+<span class="sd">            or more transactions) if connected is set to `True`.</span>
+
+<span class="sd">            The best way to retrieve a large number of input addresses</span>
+<span class="sd">            (may be for the whole blockchain) is to retrieve blocks</span>
+<span class="sd">            in sequential order using the `get_block_iter_range()`</span>
+<span class="sd">            method, and set `connected=True`, which is almost as fast</span>
+<span class="sd">            as `connected=False`.</span>
+<span class="sd">            ``</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height: the height of the block.</span>
+<span class="sd">            simplify: whether to use simpler format, (i.e., discard</span>
+<span class="sd">                witness program, script public hash, etc.), which makes</span>
+<span class="sd">                parsing to python objects lot faster.</span>
+<span class="sd">            connected: whether to replace inputs by related previous outputs.</span>
+
+<span class="sd">        Returns: block data, or error if the height is not yet synced.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_simple</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_full</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_simple_connected</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_full_connected</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_block_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get block header information.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Block header information include **number of transactions**,</span>
+<span class="sd">            **block time**, **nounce**, and so on.</span>
