@@ -610,3 +610,164 @@ Bitcoin Core.</li>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_height_from_hash</span><span class="p">(</span><span class="n">block_hash</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">simplify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">connected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get transaction data from transaction ID.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Setting connected to `True` will retrieve the sender&#39;s</span>
+<span class="sd">            addresses. This operation queries the on-disk levelDB</span>
+<span class="sd">            to read transactions, and is not the most performant.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            txid (str): transaction id (hex string).</span>
+<span class="sd">            simplify (bool): default True. Use simpler format.</span>
+<span class="sd">            connected (bool): whether to replace inputs by</span>
+<span class="sd">                related outputs according to input outpoints.</span>
+
+<span class="sd">        Returns: transaction data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_simple</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_full</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_simple_connected</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_full_connected</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_height_from_txid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get height of the block that includes a transaction.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This operation queries the on-disk levelDB (txindex).</span>
+<span class="sd">            Thus is not the most performant operation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            txid(str): transaction id (hex string).</span>
+
+<span class="sd">        Returns: height (int).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_height_from_txid</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_block_iter_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                             <span class="n">stop</span><span class="p">,</span>
+                             <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="n">simplify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                             <span class="n">connected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Iterate through blocks in ascending order of heights.</span>
+
+<span class="sd">        This iterator fails fast. Any error interrupts it.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This is best way to retrieve a large number of input</span>
+<span class="sd">            addresses (set connected to `True`).</span>
+
+<span class="sd">            It loops over blocks and transactions in sequential</span>
+<span class="sd">            order, and keeps track of unspent outputs, which enables</span>
+<span class="sd">            looking up outpoints in memory instead of using levelDB.</span>
+
+<span class="sd">            When `connected=True`, iterating through 0 to 700000 blocks</span>
+<span class="sd">            requires about 5 GB memory.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            ::</span>
+
+<span class="sd">                # get connected blocks use a `for in loop`</span>
+<span class="sd">                for block in db.get_block_iter_range(stop=700000, connected=True):</span>
+<span class="sd">                    do_some_computation_with_the_block(block)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            stop: stop height (excluded).</span>
+<span class="sd">            start: starting height, which is ignored if `connected=True`</span>
+<span class="sd">                since connected iterator can only run from first block.</span>
+<span class="sd">            simplify: default True. Use simpler format.</span>
+<span class="sd">            connected: default False. Set to `True` to find out input</span>
+<span class="sd">                addresses.</span>
+
+<span class="sd">        Returns: python iterator of block.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_simple_seq</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_full_seq</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_simple_connected</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_full_connected</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_block_iter_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                             <span class="n">heights</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                             <span class="n">simplify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Iterate through blocks of a given list of heights.</span>
+
+<span class="sd">        This iterator fails fast. Any error interrupts it.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This iterator is also implemented to execute in parallel.</span>
+<span class="sd">            However, the throughput might be restricted by python.</span>
+
+<span class="sd">            This iterator does not support connecting outpoints.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            ::</span>
+
+<span class="sd">                # get connected blocks use a `for in loop`</span>
+<span class="sd">                for block in db.get_block_iter_array(list(range(2000, 3000))):</span>
+<span class="sd">                    do_some_computation_with_the_block(block)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            heights: a list of heights.</span>
+<span class="sd">            simplify: default True. Use simpler format.</span>
+
+<span class="sd">        Returns: python iterator of block.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_simple_arr</span><span class="p">(</span><span class="n">heights</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">iter_block_full_arr</span><span class="p">(</span><span class="n">heights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script_pub_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Decode the script type and addresses from script public key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            script_pub_key: script public key (hex encoded string).</span>
+
+<span class="sd">        Returns: script type and related addresses.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">parse_script</span><span class="p">(</span><span class="n">script_pub_key</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Query bitcoin core like a database.</p>
+</div>
+
+
+                            <div id="BitcoinDB.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">BitcoinDB</span><span class="signature">(path: str, tx_index: bool = True)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tx_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate this class to query bitcoin core files.</span>
