@@ -949,3 +949,163 @@ and will print a warning if it fails to open.</li>
 <span class="sd">                witness program, script public hash, etc.), which makes</span>
 <span class="sd">                parsing to python objects lot faster.</span>
 <span class="sd">            connected: whether to replace inputs by related previous outputs.</span>
+
+<span class="sd">        Returns: block data, or error if the height is not yet synced.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_simple</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_full</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_simple_connected</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_full_connected</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get the block of a specific height.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>To get addresses of inputs, set connected to <code>True</code>.</p>
+  
+  <p>However, tracing block inputs in this manner requires
+  extensive query to txindex levelDB, and random reading
+  of disk, which is too slow. It takes several seconds
+  to get just one big block (i.e., blocks with 1 thousand
+  or more transactions) if connected is set to <code>True</code>.</p>
+  
+  <p>The best way to retrieve a large number of input addresses
+  (may be for the whole blockchain) is to retrieve blocks
+  in sequential order using the <code><a href="#BitcoinDB.get_block_iter_range">get_block_iter_range()</a></code>
+  method, and set <code>connected=True</code>, which is almost as fast
+  as <code>connected=False</code>.
+  ``</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>height:</strong>  the height of the block.</li>
+<li><strong>simplify:</strong>  whether to use simpler format, (i.e., discard
+witness program, script public hash, etc.), which makes
+parsing to python objects lot faster.</li>
+<li><strong>connected:</strong>  whether to replace inputs by related previous outputs.</li>
+</ul>
+
+<p>Returns: block data, or error if the height is not yet synced.</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_block_header" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_block_header">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_block_header</span><span class="signature">(self, height: int) -&gt; dict</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_block_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get block header information.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Block header information include **number of transactions**,</span>
+<span class="sd">            **block time**, **nounce**, and so on.</span>
+
+<span class="sd">            This is an in-memory query, thus very fast.</span>
+<span class="sd">            This method is useful for computing blockchain statistics.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height: block height.</span>
+
+<span class="sd">        Returns: header information.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_block_header</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get block header information.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>Block header information include <strong>number of transactions</strong>,
+  <strong>block time</strong>, <strong>nounce</strong>, and so on.</p>
+  
+  <p>This is an in-memory query, thus very fast.
+  This method is useful for computing blockchain statistics.</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>height:</strong>  block height.</li>
+</ul>
+
+<p>Returns: header information.</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_hash_from_height" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_hash_from_height">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_hash_from_height</span><span class="signature">(self, height: int) -&gt; str</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_hash_from_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get block hash of a certain height.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This is an in-memory query, thus very fast.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height(int): block height.</span>
+
+<span class="sd">        Returns: block hash (hex string).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_hash_from_height</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get block hash of a certain height.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>This is an in-memory query, thus very fast.</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>height(int):</strong>  block height.</li>
+</ul>
+
+<p>Returns: block hash (hex string).</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_height_from_hash" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_height_from_hash">#&nbsp;&nbsp</a>
+
+        
