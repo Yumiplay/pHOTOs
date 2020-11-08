@@ -1109,3 +1109,185 @@ parsing to python objects lot faster.</li>
                                         <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_height_from_hash">#&nbsp;&nbsp</a>
 
         
+            <span class="def">def</span>
+            <span class="name">get_height_from_hash</span><span class="signature">(self, block_hash: str) -&gt; int</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_height_from_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get block height of certain hash.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This is an in-memory query, thus very fast.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block_hash(str): block hash (hex string).</span>
+
+<span class="sd">        Returns: block height.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_height_from_hash</span><span class="p">(</span><span class="n">block_hash</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get block height of certain hash.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>This is an in-memory query, thus very fast.</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>block_hash(str):</strong>  block hash (hex string).</li>
+</ul>
+
+<p>Returns: block height.</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_transaction" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_transaction">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_transaction</span><span class="signature">(
+    self,
+    txid: str,
+    simplify: bool = True,
+    connected: bool = False
+) -&gt; dict</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">simplify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">connected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get transaction data from transaction ID.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Setting connected to `True` will retrieve the sender&#39;s</span>
+<span class="sd">            addresses. This operation queries the on-disk levelDB</span>
+<span class="sd">            to read transactions, and is not the most performant.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            txid (str): transaction id (hex string).</span>
+<span class="sd">            simplify (bool): default True. Use simpler format.</span>
+<span class="sd">            connected (bool): whether to replace inputs by</span>
+<span class="sd">                related outputs according to input outpoints.</span>
+
+<span class="sd">        Returns: transaction data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_simple</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_full</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_simple_connected</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_transaction_full_connected</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get transaction data from transaction ID.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>Setting connected to <code>True</code> will retrieve the sender's
+  addresses. This operation queries the on-disk levelDB
+  to read transactions, and is not the most performant.</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>txid (str):</strong>  transaction id (hex string).</li>
+<li><strong>simplify (bool):</strong>  default True. Use simpler format.</li>
+<li><strong>connected (bool):</strong>  whether to replace inputs by
+related outputs according to input outpoints.</li>
+</ul>
+
+<p>Returns: transaction data.</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_height_from_txid" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_height_from_txid">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_height_from_txid</span><span class="signature">(self, txid: str) -&gt; int</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_height_from_txid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get height of the block that includes a transaction.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This operation queries the on-disk levelDB (txindex).</span>
+<span class="sd">            Thus is not the most performant operation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            txid(str): transaction id (hex string).</span>
+
+<span class="sd">        Returns: height (int).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_index</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tx_index is set to False&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_height_from_txid</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get height of the block that includes a transaction.</p>
+
+<h6 id="notes">Notes</h6>
+
+<blockquote>
+  <p>This operation queries the on-disk levelDB (txindex).
+  Thus is not the most performant operation.</p>
+</blockquote>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>txid(str):</strong>  transaction id (hex string).</li>
+</ul>
+
+<p>Returns: height (int).</p>
+</div>
+
+
+                            </div>
+                            <div id="BitcoinDB.get_block_iter_range" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BitcoinDB.get_block_iter_range">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_block_iter_range</span><span class="signature">(
+    self,
+    stop,
+    start: int = 0,
+    simplify: bool = True,
+    connected: bool = False
+) -&gt; Iterator[dict]</span>:
+    </div>
