@@ -121,3 +121,131 @@
                     } else {
                         console.time("building search index");
                         searchIndex = elasticlunr(function () {
+                            this.addField('qualname');
+                            this.addField('fullname');
+                            this.addField('doc');
+                            this.setRef('fullname');
+                        });
+                        for (let doc of docs) {
+                            searchIndex.addDoc(doc);
+                        }
+                        console.timeEnd("building search index");
+                    }
+                    onInput();
+
+                    document.querySelector("nav.pdoc").addEventListener("click", e => {
+                        if (e.target.hash) {
+                            searchBox.value = "";
+                            searchBox.dispatchEvent(new Event("input"));
+                        }
+                    });
+                }
+
+                function onInput() {
+                    setContent((() => {
+                        const search = getSearchTerm();
+                        if (!search) {
+                            return null
+                        }
+                        if (searchErr) {
+                            return `<h3>Error: ${searchErr}</h3>`
+                        }
+                        if (!searchIndex) {
+                            return "<h3>Searching...</h3>"
+                        }
+
+                        window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+
+                        const results = searchIndex.search(search, {
+                            fields: {
+                                qualname: {boost: 4},
+                                fullname: {boost: 2},
+                                doc: {boost: 1},
+                            },
+                            expand: true
+                        });
+
+                        let html;
+                        if (results.length === 0) {
+                            html = `No search results for '${escapeHTML(search)}'.`
+                        } else {
+                            html = `<h4>${results.length} search result${results.length > 1 ? "s" : ""} for '${escapeHTML(search)}'.</h4>`;
+                        }
+                        for (let result of results.slice(0, 10)) {
+                            let doc = result.doc;
+                            let url = `${doc.modulename.replaceAll(".", "/")}.html`;
+                            if (doc.qualname) {
+                                url += `#${doc.qualname}`;
+                            }
+
+                            let heading;
+                            switch (result.doc.type) {
+                                case "function":
+                                    heading = `<span class="def">${doc.funcdef}</span> <span class="name">${doc.fullname}</span><span class="signature">(${doc.parameters.join(", ")})</span>`;
+                                    break;
+                                case "class":
+                                    heading = `<span class="def">class</span> <span class="name">${doc.fullname}</span>`;
+                                    break;
+                                default:
+                                    heading = `<span class="name">${doc.fullname}</span>`;
+                                    break;
+                            }
+                            html += `
+                        <section class="search-result">
+                        <a href="${url}" class="attr ${doc.type}">${heading}</a>
+                        <div class="docstring">${doc.doc}</div>
+                        </section>
+                    `;
+
+                        }
+                        return html;
+                    })());
+                }
+
+                if (getSearchTerm()) {
+                    initialize();
+                    searchBox.value = getSearchTerm();
+                    onInput();
+                } else {
+                    searchBox.addEventListener("focus", initialize, {once: true});
+                }
+
+                searchBox.addEventListener("keydown", e => {
+                    if (["ArrowDown", "ArrowUp", "Enter"].includes(e.key)) {
+                        let focused = currentContent.querySelector(".search-result.focused");
+                        if (!focused) {
+                            currentContent.querySelector(".search-result").classList.add("focused");
+                        } else if (
+                            e.key === "ArrowDown"
+                            && focused.nextElementSibling
+                            && focused.nextElementSibling.classList.contains("search-result")
+                        ) {
+                            focused.classList.remove("focused");
+                            focused.nextElementSibling.classList.add("focused");
+                            focused.nextElementSibling.scrollIntoView({
+                                behavior: "smooth",
+                                block: "nearest",
+                                inline: "nearest"
+                            });
+                        } else if (
+                            e.key === "ArrowUp"
+                            && focused.previousElementSibling
+                            && focused.previousElementSibling.classList.contains("search-result")
+                        ) {
+                            focused.classList.remove("focused");
+                            focused.previousElementSibling.classList.add("focused");
+                            focused.previousElementSibling.scrollIntoView({
+                                behavior: "smooth",
+                                block: "nearest",
+                                inline: "nearest"
+                            });
+                        } else if (
+                            e.key === "Enter"
+                        ) {
+                            focused.querySelector("a").click();
+                        }
+                    }
+                });
+            </script>
+</body>
+</html>
