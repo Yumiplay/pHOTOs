@@ -1,1 +1,1 @@
-{"version": "0.9.5", "fields": ["qualname"
+{"version": "0.9.5", "fields": ["qualname", "fullname", "doc"], "ref": "fullname", "documentStore": {"docs": {"bitcoin_explorer": {"fullname": "bitcoin_explorer", "modulename": "bitcoin_explorer", "qualna
