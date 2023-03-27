@@ -2,4 +2,7 @@
 name = "bitcoin-explorer"
 version = "1.2.19"
 description = "High Performance Blockchain Deserializer"
-long_description_content_ty
+long_description_content_type="text/markdown"
+readme = "README.md"
+homepage = 'https://github.com/Congyuwang/Py-Bitcoin-Explorer'
+repository = 'https://github.com/Congyuwang/Py-Bi
