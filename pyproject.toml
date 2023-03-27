@@ -1,0 +1,5 @@
+[project]
+name = "bitcoin-explorer"
+version = "1.2.19"
+description = "High Performance Blockchain Deserializer"
+long_description_content_ty

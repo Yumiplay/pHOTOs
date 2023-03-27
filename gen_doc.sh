@@ -1,4 +1,4 @@
 #!/bin/bash
 
 pydocstyle bitcoinquery/
-pdoc -o ./doc
+pdoc -o ./docs/ -d google ./bitcoin_explorer
