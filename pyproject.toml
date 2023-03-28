@@ -9,4 +9,11 @@ repository = 'https://github.com/Congyuwang/Py-Bitcoin-Explorer'
 documentation = 'https://congyuwang.github.io/Py-Bitcoin-Explorer/bitcoin_explorer.html'
 
 keywords = ["rust", "bitcoin", "blockchain", "deserialize",
-    "parser", "explorer", "crypto", 
+    "parser", "explorer", "crypto", "transaction"]
+
+[package.metadata.maturin]
+python-source = "bitcoin_explorer"
+
+classifiers=[
+    "Programming Language :: Rust",
+    "License :: OSI Approved :: 
