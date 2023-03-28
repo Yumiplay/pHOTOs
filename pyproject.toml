@@ -5,4 +5,8 @@ description = "High Performance Blockchain Deserializer"
 long_description_content_type="text/markdown"
 readme = "README.md"
 homepage = 'https://github.com/Congyuwang/Py-Bitcoin-Explorer'
-repository = 'https://github.com/Congyuwang/Py-Bi
+repository = 'https://github.com/Congyuwang/Py-Bitcoin-Explorer'
+documentation = 'https://congyuwang.github.io/Py-Bitcoin-Explorer/bitcoin_explorer.html'
+
+keywords = ["rust", "bitcoin", "blockchain", "deserialize",
+    "parser", "explorer", "crypto", 
