@@ -16,4 +16,8 @@ python-source = "bitcoin_explorer"
 
 classifiers=[
     "Programming Language :: Rust",
-    "License :: OSI Approved :: 
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX :: Linux',
