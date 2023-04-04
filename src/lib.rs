@@ -123,3 +123,192 @@ impl BitcoinDBPy {
     }
 
     #[pyo3(text_signature = "($self, txid, /)")]
+    fn get_transaction_simple(&self, txid: String, py: Python) -> PyResult<PyObject> {
+        if let Ok(txid) = Txid::from_hex(&txid) {
+            match self.get_transaction::<STransaction>(&txid) {
+                Ok(t) => t.to_py(py),
+                Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+            }
+        } else {
+            Err(pyo3::exceptions::PyException::new_err(
+                "invalid txid format",
+            ))
+        }
+    }
+
+    #[pyo3(text_signature = "($self, txid, /)")]
+    fn get_transaction_full_connected(&self, txid: String, py: Python) -> PyResult<PyObject> {
+        if let Ok(txid) = Txid::from_hex(&txid) {
+            match self.get_connected_transaction::<FConnectedTransaction>(&txid) {
+                Ok(t) => t.to_py(py),
+                Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+            }
+        } else {
+            Err(pyo3::exceptions::PyException::new_err(
+                "invalid txid format",
+            ))
+        }
+    }
+
+    #[pyo3(text_signature = "($self, txid, /)")]
+    fn get_transaction_simple_connected(&self, txid: String, py: Python) -> PyResult<PyObject> {
+        if let Ok(txid) = Txid::from_hex(&txid) {
+            match self.get_connected_transaction::<SConnectedTransaction>(&txid) {
+                Ok(t) => t.to_py(py),
+                Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+            }
+        } else {
+            Err(pyo3::exceptions::PyException::new_err(
+                "invalid txid format",
+            ))
+        }
+    }
+
+    #[pyo3(text_signature = "($self, stop, /)")]
+    fn iter_block_full_arr(&self, heights: Vec<usize>) -> PyResult<FBlockIterArr> {
+        Ok(FBlockIterArr::new(&self, heights))
+    }
+
+    #[pyo3(text_signature = "($self, stop, /)")]
+    fn iter_block_simple_arr(&self, heights: Vec<usize>) -> PyResult<SBlockIterArr> {
+        Ok(SBlockIterArr::new(&self, heights))
+    }
+
+    #[pyo3(text_signature = "($self, start, stop, /)")]
+    fn iter_block_full_seq(&self, start: usize, stop: usize) -> PyResult<FBlockIter> {
+        Ok(FBlockIter::new(&self, start, stop))
+    }
+
+    #[pyo3(text_signature = "($self, start, stop, /)")]
+    fn iter_block_simple_seq(&self, start: usize, stop: usize) -> PyResult<SBlockIter> {
+        Ok(SBlockIter::new(&self, start, stop))
+    }
+
+    #[pyo3(text_signature = "($self, stop, /)")]
+    fn iter_block_full_connected(&self, stop: usize) -> PyResult<FConnBlockIter> {
+        Ok(FConnBlockIter::new(&self, stop))
+    }
+
+    #[pyo3(text_signature = "($self, stop, /)")]
+    fn iter_block_simple_connected(&self, stop: usize) -> PyResult<SConnBlockIter> {
+        Ok(SConnBlockIter::new(&self, stop))
+    }
+
+    #[pyo3(text_signature = "($self, /)")]
+    fn get_max_height(&self) -> usize {
+        self.0.get_block_count()
+    }
+
+    #[pyo3(text_signature = "($self, /)")]
+    fn get_block_count(&self) -> usize {
+        self.0.get_block_count()
+    }
+
+    #[staticmethod]
+    #[pyo3(text_signature = "($self, script_pub_key, /)")]
+    fn parse_script(script_pub_key: String, py: Python) -> PyResult<PyObject> {
+        let script = get_addresses_from_script(&script_pub_key);
+        match script {
+            Ok(script) => script.to_py(py),
+            Err(_) => Err(pyo3::exceptions::PyException::new_err(
+                "failed to parse script_pub_key",
+            )),
+        }
+    }
+}
+
+// construct python iterators
+derive_py_iter!(
+    FBlockIterArr,
+    BlockIter,
+    FBlock,
+    iter_heights,
+    heights: Vec<usize>
+);
+derive_py_iter!(
+    SBlockIterArr,
+    BlockIter,
+    SBlock,
+    iter_heights,
+    heights: Vec<usize>
+);
+derive_py_iter!(
+    FBlockIter,
+    BlockIter,
+    FBlock,
+    iter_block,
+    start: usize,
+    end: usize
+);
+derive_py_iter!(
+    SBlockIter,
+    BlockIter,
+    SBlock,
+    iter_block,
+    start: usize,
+    end: usize
+);
+derive_py_iter!(
+    FConnBlockIter,
+    ConnectedBlockIter,
+    FConnectedBlock,
+    iter_connected_block,
+    end: usize
+);
+derive_py_iter!(
+    SConnBlockIter,
+    ConnectedBlockIter,
+    SConnectedBlock,
+    iter_connected_block,
+    end: usize
+);
+
+#[macro_export]
+macro_rules! derive_py_iter {
+    ($new_iter_type:ident, $inner_iter_type:ident, $iter_type:ty,
+     $new:ident, $( $p:ident: $type:ty ),*) => {
+        #[pyclass]
+        struct $new_iter_type {
+            iter: $inner_iter_type<$iter_type>,
+        }
+
+        impl $new_iter_type {
+            fn new(db: &BitcoinDB, $($p: $type),*) -> $new_iter_type {
+                let inner_iter: $inner_iter_type<$iter_type> = db.$new($($p),*);
+                $new_iter_type {
+                    iter: inner_iter,
+                }
+            }
+        }
+
+        #[pymethods]
+        impl $new_iter_type {
+            fn __iter__(slf: PyRef<Self>) -> PyRef<Self> {
+                slf
+            }
+
+            fn __next__(mut slf: PyRefMut<Self>) -> Option<PyObject> {
+                let option_block: Option<$iter_type> = slf.iter.next();
+                if let Some(output) = option_block {
+                    Python::with_gil(|py| {
+                        if let Ok(py_obj) = output.to_py(py) {
+                            Some(py_obj)
+                        } else {
+                            None
+                        }
+                    })
+                } else {
+                    None
+                }
+            }
+        }
+    };
+}
+
+#[pymodule]
+#[pyo3(name = "bitcoin_explorer")]
+fn py_bitcoin_explorer(_py: Python, m: &PyModule) -> PyResult<()> {
+    pyo3_log::init();
+    m.add_class::<BitcoinDBPy>()?;
+    Ok(())
+}
